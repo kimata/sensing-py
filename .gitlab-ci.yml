@@ -59,7 +59,6 @@ build-image:
             --build-arg IMAGE_BUILD_DATE=$(date --iso-8601=seconds)
             --tag ${CI_REGISTRY_IMAGE}:${TAG} --push .
 
-
 tag-latest:
     stage: tag-latest
 
@@ -75,8 +74,6 @@ tag-latest:
           when: never
         - when: on_success
 
-            
-            
 deploy:
     stage: deploy
 
@@ -91,7 +88,6 @@ deploy:
           when: never
         - when: on_success
 
-          
 renovate:
     stage: renovate
     dependencies: []
@@ -106,5 +102,3 @@ renovate:
         - if: $CI_PIPELINE_SOURCE == "schedule"
         - changes:
               - renovate.json
-
-            
