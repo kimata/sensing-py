@@ -61,7 +61,7 @@ def execute(config):
             my_lib.footprint.update(pathlib.Path(config["liveness"]["file"]["sensing"]))
 
         elapsed_time = time.time() - time_start
-        sleep_time = config["sensing"]["interval_sec"] - elapsed_time
+        sleep_time = max(config["sensing"]["interval_sec"] - elapsed_time, 1)
 
         if should_terminate:
             logging.warning("SIGTERM received")
