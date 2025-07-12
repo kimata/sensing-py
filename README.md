@@ -1,37 +1,197 @@
-# 環境センシングアプリ
+# 🌡️ sensing-py
 
-## 概要
+## 📑 目次
 
-I2C/SPI/UART で接続されたセンサーで計測を行い，結果を Fluentd で送信するアプリです．
+- [📋 概要](#-概要)
+    - [主な特徴](#主な特徴)
+- [🏗️ システム構成](#️-システム構成)
+- [📊 対応センサ](#-対応センサ)
+- [🚀 セットアップ](#-セットアップ)
+    - [必要な環境](#必要な環境)
+    - [1. ハードウェア設定](#1-ハードウェア設定)
+    - [2. 設定ファイルの準備](#2-設定ファイルの準備)
+- [💻 実行方法](#-実行方法)
+    - [Docker を使用する場合（推奨）](#docker-を使用する場合推奨)
+    - [uv を使用する場合](#uv-を使用する場合)
+    - [コマンドラインオプション](#コマンドラインオプション)
+- [🔧 設定](#-設定)
+- [☸️ Kubernetes デプロイ](#️-kubernetes-デプロイ)
+- [🧪 テスト](#-テスト)
+- [📊 CI/CD](#-cicd)
+- [📝 ライセンス](#-ライセンス)
 
-## 対応センサ
+## 📋 概要
 
-| 種類           | センサー型式                 | センサメーカ      |
-| -------------- | ---------------------------- | ----------------- |
-| 温湿度センサ   | SHT-35                       | Sensirion         |
-| CO2 センサ     | SCD4x                        | Sensirion         |
-| 周囲光センサ   | APDS-9250                    | Broadcom          |
-| UV光センサ     | VEML6075                     | Vishay            |
-| 照度センサ     | VEML7700                     | Vishay            |
-| 水温 センサ    | EZO RTD Temperature Circuit  | Atlas Scientific  |
-| 溶存酸素センサ | EZO Dissolved Oxygen Circuit | Atlas Scientific  |
-| PH センサ      | EZO pH Circuit               | Atlas Scientific  |
-| TDS センサ     | Grove - TDS Sensor           | Grove             |
-| 流量センサ     | FD-Q10C                      | KEYENCE           |
-| A/D 変換器     | ADS1015                      | Texas Instruments |
-| 熱電対アンプ   | MAX31856                     | Analog Devices    |
-| 雨量計         | RG-15                        | Hydreon           |
-| 日射計         | LPPYRA03                     | Delta OHM         |
-| 照度計         | SM9561                       | SONBEST           |
+I2C/SPI/UART で接続されたセンサーで環境計測を行い、結果を Fluentd で送信する Raspberry Pi 向けセンシングアプリケーションです。
 
-## 設定
+### 主な特徴
 
-Raspberry Pi の場合， `/boot/firmware/config.txt` に以下の設定を行っておきます．
+- 🔌 **マルチインターフェース対応** - I2C/SPI/UART による多様なセンサー接続
+- 📡 **Fluentd 連携** - リアルタイムデータ送信とログ集約
+- 🐳 **コンテナ対応** - Docker および Kubernetes デプロイメント
+- 🔍 **自動センサー検出** - 接続されたセンサーの自動認識
+- 💪 **高可用性** - ヘルスチェック機能とグレースフルシャットダウン
+- ⚙️ **設定可能** - YAML ベース設定とスキーマ検証
+
+## 🏗️ システム構成
+
+```
+センサー群 → sensing-py → Fluentd → データストレージ/処理
+```
+
+- **フレームワーク**: Python 3.10+
+- **パッケージマネージャ**: uv
+- **通信プロトコル**: I2C (smbus2), SPI (spidev), UART
+- **データ送信**: Fluentd (fluent-logger)
+- **デプロイ**: Docker + Kubernetes
+
+## 📊 対応センサ
+
+### ローカル実装センサ
+
+| センサー型式 | 種類           | メーカー         | インターフェース | 実装ファイル               |
+| ------------ | -------------- | ---------------- | ---------------- | -------------------------- |
+| VEML6075     | UV 光センサ    | Vishay           | I2C              | `lib/sensor/veml6075.py:*` |
+| VEML7700     | 照度センサ     | Vishay           | I2C              | `lib/sensor/veml7700.py:*` |
+| EZO-DO       | 溶存酸素センサ | Atlas Scientific | I2C              | `lib/sensor/ezo_do.py:*`   |
+| MAX31856     | 熱電対アンプ   | Analog Devices   | SPI              | `lib/sensor/max31856.py:*` |
+
+### 外部ライブラリセンサ
+
+以下センサーは [my-py-lib](https://github.com/kimata/my-py-lib) ライブラリ経由で対応：
+
+| センサー型式 | 種類         | メーカー          | インターフェース |
+| ------------ | ------------ | ----------------- | ---------------- |
+| SHT-35       | 温湿度センサ | Sensirion         | I2C              |
+| SCD4x        | CO2 センサ   | Sensirion         | I2C              |
+| APDS-9250    | 周囲光センサ | Broadcom          | I2C              |
+| EZO RTD      | 水温センサ   | Atlas Scientific  | I2C              |
+| EZO pH       | pH センサ    | Atlas Scientific  | I2C              |
+| Grove TDS    | TDS センサ   | Grove             | A/D              |
+| FD-Q10C      | 流量センサ   | KEYENCE           | A/D              |
+| ADS1015      | A/D 変換器   | Texas Instruments | I2C              |
+| RG-15        | 雨量計       | Hydreon           | UART             |
+| LPPYRA03     | 日射計       | Delta OHM         | A/D              |
+| SM9561       | 照度計       | SONBEST           | UART             |
+
+## 🚀 セットアップ
+
+### 必要な環境
+
+- Raspberry Pi (GPIO 制御が可能なモデル)
+- Python 3.10+
+- Docker (オプション)
+
+### 1. ハードウェア設定
+
+Raspberry Pi の `/boot/firmware/config.txt` に以下を追加：
 
 ```text
 dtparam=i2c_arm=on
 dtparam=i2c_vc=on
 dtparam=spi=on
 dtoverlay=disable-bt
-dtparam=spi=on
 ```
+
+### 2. 設定ファイルの準備
+
+```bash
+cp config.example.yaml config.yaml
+# config.yaml を環境に合わせて編集
+```
+
+## 💻 実行方法
+
+### Docker を使用する場合（推奨）
+
+```bash
+# イメージの取得と実行
+docker run --rm --privileged \
+  -v $(pwd)/config.yaml:/opt/sensing_py/config.yaml \
+  gitlab.green-rabbit.net:5050/kimata/sensing-py:latest
+```
+
+### uv を使用する場合
+
+```bash
+# uv のインストール（未インストールの場合）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 依存関係のインストールと実行
+uv sync
+uv run python src/app.py
+```
+
+### コマンドラインオプション
+
+```bash
+# メインアプリケーション
+./src/app.py [-c CONFIG_FILE] [-D]
+
+# ヘルスチェック
+./src/healthz.py [-c CONFIG_FILE] [-d]
+```
+
+オプション：
+
+- `-c CONFIG_FILE`: 設定ファイル指定（デフォルト: `config.yaml`）
+- `-D`: デバッグモード
+- `-d`: ダミーモード（ヘルスチェック用）
+
+## 🔧 設定
+
+`config.yaml` の設定例：
+
+```yaml
+fluentd:
+    host: proxy.green-rabbit.net
+
+sensor:
+    - name: sm9561
+    - name: scd4x
+    - name: max31856
+    - name: sht35
+    - name: apds9250
+    - name: veml7700
+    - name: veml6075
+      bus: vc
+
+sensing:
+    interval_sec: 20
+
+liveness:
+    file:
+        sensing: /dev/shm/healthz
+```
+
+設定項目：
+
+- **fluentd.host**: データ送信先 Fluentd ホスト
+- **sensor**: 使用するセンサーのリスト
+- **sensing.interval_sec**: センシング間隔（最小1秒）
+- **liveness.file**: ヘルスチェック用ファイルパス
+
+## ☸️ Kubernetes デプロイ
+
+GitLab CI/CD により自動デプロイされます：
+
+```yaml
+# デプロイメント設定（.gitlab-ci.yml より）
+namespace: sensor
+deployment: sensor-power-deployment
+registry: gitlab.green-rabbit.net:5050
+```
+
+## 🧪 テスト
+
+```bash
+# テストの実行
+uv run pytest
+
+# カバレッジ付きテスト
+uv run pytest --cov
+```
+
+## 📝 ライセンス
+
+このプロジェクトは Apache License Version 2.0 のもとで公開されています。
