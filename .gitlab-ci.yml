@@ -64,6 +64,8 @@ tag-latest:
 
     needs:
         - generate-tag
+        - job: build-image
+          artifacts: false
 
     script:
         - 'echo "Tagging multi-arch image ${CI_REGISTRY_IMAGE}:${TAG} as latest"'
