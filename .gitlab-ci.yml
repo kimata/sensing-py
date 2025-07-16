@@ -83,8 +83,7 @@ deploy:
     stage: deploy
 
     image:
-        name: bitnami/kubectl:latest
-        entrypoint: [""]
+        name: gitlab.green-rabbit.net:5050/kimata/local-kubectl:250715_c88f3965
 
     script:
         - 'IMAGE="${CI_REGISTRY_IMAGE}:${TAG}"'
@@ -96,15 +95,11 @@ deploy:
             kimata/sensing-py:pod-rollout
         # イメージの更新
         - 'echo "Updating deployment images to $TAG..."'
-        - >
-            kubectl --insecure-skip-tls-verify=true -n sensor set image
-            deployment/sensor-power-deployment sensor-power=${IMAGE}
+        - kubectl -n sensor set image deployment/sensor-power sensor-power=${IMAGE}
 
         # ロールアウト状況の確認
         - 'echo "Waiting for deployments to complete..."'
-        - >
-            kubectl --insecure-skip-tls-verify=true -n sensor rollout status
-            deployment/sensor-power-deployment --timeout=120s
+        - kubectl -n sensor rollout status deployment/sensor-power --timeout=120s
 
         - 'echo "✓ All deployments updated successfully to $TAG"'
 
