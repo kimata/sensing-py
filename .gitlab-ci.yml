@@ -29,7 +29,7 @@ build-image:
         - generate-tag
 
     variables:
-        BUILDER: builder
+        BUILDER: builder-${CI_PROJECT_NAME}
 
     before_script:
         - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
