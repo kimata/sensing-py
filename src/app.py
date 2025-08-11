@@ -31,7 +31,7 @@ def sig_handler(num, _):
 
     logging.warning("receive signal %d", num)
 
-    if num == signal.SIGTERM:
+    if num in (signal.SIGTERM, signal.SIGINT):
         should_terminate = True
 
 
