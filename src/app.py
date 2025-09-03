@@ -53,12 +53,14 @@ def execute(config):
         time_start = time.time()
         logging.info("Start.")
 
-        value_map = my_lib.sensor.sense(active_sensor_list)
+        value_map, is_success = my_lib.sensor.sense(active_sensor_list)
         value_map.update({"hostname": hostname})
 
         if my_lib.fluentd_util.send(sender, "rasp", value_map):
             logging.info("Send OK.")
-            my_lib.footprint.update(pathlib.Path(config["liveness"]["file"]["sensing"]))
+            if is_success:
+                # NOTE: センシングも送信もうまく行った場合のみ Liveness を更新する
+                my_lib.footprint.update(pathlib.Path(config["liveness"]["file"]["sensing"]))
 
         elapsed_time = time.time() - time_start
         sleep_time = max(config["sensing"]["interval_sec"] - elapsed_time, 1)
