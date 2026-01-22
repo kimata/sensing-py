@@ -1,6 +1,6 @@
 [project]
 name = "sensing-py"
-version = "0.1.0"
+dynamic = ["version"]
 description = "I2C/SPI/UART で接続されたセンサーで計測を行い，結果を Fluentd で送信するアプリです．"
 authors = [
     { name = "KIMATA Tetsuya", email = "kimata@green-rabbit.net" }
