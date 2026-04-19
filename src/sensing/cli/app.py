@@ -3,7 +3,7 @@
 I2C/SPI/UART で接続されたセンサーで計測を行い，結果を Fluentd で送信するスクリプトです．
 
 Usage:
-  app.py [-c CONFIG] [-D]
+  sensing [-c CONFIG] [-D]
 
 Options:
   -c CONFIG         : CONFIG を設定ファイルとして読み込んで実行します．[default: config.yaml]
@@ -17,8 +17,11 @@ import signal
 import socket
 import time
 
+import docopt
+import my_lib.config
 import my_lib.fluentd_util
 import my_lib.footprint
+import my_lib.logger
 import my_lib.sensor
 
 SCHEMA_CONFIG = "config.schema"
@@ -78,12 +81,7 @@ def execute(config):
         time.sleep(sleep_time)
 
 
-######################################################################
-if __name__ == "__main__":
-    import docopt
-    import my_lib.config
-    import my_lib.logger
-
+def main():
     args = docopt.docopt(__doc__)
 
     config_file = args["-c"]
@@ -94,3 +92,7 @@ if __name__ == "__main__":
     config = my_lib.config.load(config_file, pathlib.Path(SCHEMA_CONFIG))
 
     execute(config)
+
+
+if __name__ == "__main__":
+    main()

@@ -3,7 +3,7 @@
 Liveness のチェックを行います
 
 Usage:
-  healthz.py [-c CONFIG] [-d]
+  sensing-healthz [-c CONFIG] [-d]
 
 Options:
   -c CONFIG         : CONFIG を設定ファイルとして読み込んで実行します．[default: config.yaml]
@@ -14,8 +14,10 @@ import logging
 import pathlib
 import sys
 
+import docopt
+import my_lib.config
 import my_lib.healthz
-from docopt import docopt
+import my_lib.logger
 
 
 def check_liveness(target_list):
@@ -26,12 +28,8 @@ def check_liveness(target_list):
     return True
 
 
-######################################################################
-if __name__ == "__main__":
-    import my_lib.config
-    import my_lib.logger
-
-    args = docopt(__doc__)
+def main():
+    args = docopt.docopt(__doc__)
 
     config_file = args["-c"]
     debug_mode = args["-d"]
@@ -55,3 +53,7 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         sys.exit(-1)
+
+
+if __name__ == "__main__":
+    main()
