@@ -40,7 +40,8 @@ def execute(config):
 
     sensor_list = my_lib.sensor.load(config["sensor"])
 
-    active_sensor_list = my_lib.sensor.ping(sensor_list)
+    active_sensor_list, inactive_sensor_list = my_lib.sensor.ping(sensor_list)
+    retry_index = 0
 
     hostname = os.environ.get("NODE_HOSTNAME", socket.gethostname())
     logging.info("Hostname: %s", hostname)
@@ -52,6 +53,10 @@ def execute(config):
     while True:
         time_start = time.time()
         logging.info("Start.")
+
+        retry_index = my_lib.sensor.retry_inactive(
+            active_sensor_list, inactive_sensor_list, retry_index
+        )
 
         value_map, is_success = my_lib.sensor.sense(active_sensor_list)
         value_map.update({"hostname": hostname})
