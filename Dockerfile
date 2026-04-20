@@ -10,7 +10,9 @@ RUN --mount=type=cache,target=/var/lib/apt,sharing=locked \
 
 ENV PATH="/root/.local/bin/:$PATH"
 
-ENV UV_LINK_MODE=copy
+ENV UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON_PREFERENCE=only-system
 
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 
