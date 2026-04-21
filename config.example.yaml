@@ -17,3 +17,12 @@ sensing:
 liveness:
     file:
         sensing: /dev/shm/healthz
+
+slack:
+    from: sensing
+    bot_token: xoxb-XXXXXXXXXXXX-XXXXXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXX
+    error:
+        channel:
+            name: "#error"
+            id: XXXXXXXXXXX
+        interval_min: 180

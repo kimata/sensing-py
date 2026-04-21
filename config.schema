@@ -66,6 +66,49 @@
             "required": [
                 "file"
             ]
+        },
+        "slack": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string"
+                },
+                "bot_token": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "object",
+                    "properties": {
+                        "channel": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name"
+                            ]
+                        },
+                        "interval_min": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "channel",
+                        "interval_min"
+                    ]
+                }
+            },
+            "required": [
+                "bot_token",
+                "error",
+                "from"
+            ]
         }
     },
     "required": [

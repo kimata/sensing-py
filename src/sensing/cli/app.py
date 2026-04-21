@@ -22,6 +22,7 @@ import my_lib.config
 import my_lib.fluentd_util
 import my_lib.footprint
 import my_lib.logger
+import my_lib.notify.slack
 import my_lib.sensor
 
 SCHEMA_CONFIG = "config.schema"
@@ -50,6 +51,7 @@ def execute(config):
     logging.info("Hostname: %s", hostname)
 
     sender = my_lib.fluentd_util.get_handle("sensor", host=config["fluentd"]["host"])
+    slack_config = my_lib.notify.slack.SlackConfig.parse(config.get("slack", {}))
 
     signal.signal(signal.SIGTERM, sig_handler)
 
@@ -61,8 +63,15 @@ def execute(config):
             active_sensor_list, inactive_sensor_list, retry_index
         )
 
-        value_map, is_success = my_lib.sensor.sense(active_sensor_list)
+        value_map, is_success, newly_failed = my_lib.sensor.sense(active_sensor_list)
         value_map.update({"hostname": hostname})
+
+        for failed in newly_failed:
+            my_lib.notify.slack.error(
+                slack_config,
+                f"sensing ({failed.sensor.NAME})",
+                f"{my_lib.sensor.sensor_info(failed.sensor)} on {hostname}\n\n{failed.traceback}",
+            )
 
         if my_lib.fluentd_util.send(sender, "rasp", value_map):
             logging.info("Send OK.")
