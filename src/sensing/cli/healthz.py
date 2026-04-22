@@ -20,14 +20,6 @@ import my_lib.healthz
 import my_lib.logger
 
 
-def check_liveness(target_list):
-    for target in target_list:
-        if not my_lib.healthz.check_liveness(target["name"], target["liveness_file"], target["interval"]):
-            return False
-
-    return True
-
-
 def main():
     args = docopt.docopt(__doc__)
 
@@ -40,15 +32,16 @@ def main():
     config = my_lib.config.load(config_file)
 
     target_list = [
-        {
-            "name": name,
-            "liveness_file": pathlib.Path(config["liveness"]["file"][name]),
-            "interval": config[name]["interval_sec"],
-        }
+        my_lib.healthz.HealthzTarget(
+            name=name,
+            liveness_file=pathlib.Path(config["liveness"]["file"][name]),
+            interval=config[name]["interval_sec"],
+        )
         for name in ["sensing"]
     ]
 
-    if check_liveness(target_list):
+    failed = my_lib.healthz.check_liveness_all(target_list)
+    if not failed:
         logging.info("OK.")
         sys.exit(0)
     else:
