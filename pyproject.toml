@@ -11,7 +11,7 @@ requires-python = ">= 3.11"
 dependencies = [
     "docopt-ng>=0.9.0",
     "fluent-logger>=0.11.1",
-    "my-lib @ git+https://github.com/kimata/my-py-lib@6d3bf21e3ed53c1dae4288fae60bb7bf0c059b87",
+    "my-lib @ git+https://github.com/kimata/my-py-lib@7d24b47f6f9047a4975506c413efd296a9fd38cd",
     "pillow>=12.2.0",
     "spidev>=3.6",
 ]
