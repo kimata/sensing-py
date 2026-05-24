@@ -951,7 +951,7 @@ wheels = [
 [[package]]
 name = "my-lib"
 version = "0.2.0"
-source = { git = "https://github.com/kimata/my-py-lib?rev=26041de53f4a5b695fdc2ba2a54fdd6514b5aad4#26041de53f4a5b695fdc2ba2a54fdd6514b5aad4" }
+source = { git = "https://github.com/kimata/my-py-lib?rev=1ad9f4101f8e77cd17b25e59044be0f38b7e5a31#1ad9f4101f8e77cd17b25e59044be0f38b7e5a31" }
 dependencies = [
     { name = "coloredlogs" },
     { name = "dacite" },
@@ -1747,7 +1747,7 @@ dev = [
 requires-dist = [
     { name = "docopt-ng", specifier = ">=0.9.0" },
     { name = "fluent-logger", specifier = ">=0.11.1" },
-    { name = "my-lib", git = "https://github.com/kimata/my-py-lib?rev=26041de53f4a5b695fdc2ba2a54fdd6514b5aad4" },
+    { name = "my-lib", git = "https://github.com/kimata/my-py-lib?rev=1ad9f4101f8e77cd17b25e59044be0f38b7e5a31" },
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "spidev", specifier = ">=3.6" },
 ]
