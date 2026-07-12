@@ -1,15 +1,30 @@
 fluentd:
     host: proxy.green-rabbit.net
+    # port: 24224          # 省略時 24224
+    # tag: sensor          # 省略時 sensor (送信タグは <tag>.<data_label>)
+    # data_label: rasp     # 省略時 rasp
+    # NOTE: fluentd 断でもデータを失わないためのディスクスプール (省略時は無効)
+    spool_file: data/spool.jsonl
+    # spool_max_mb: 10
 
 sensor:
     - name: sm9561
+      # NOTE: 屋外照度計。APDS9250 と同じ lux キーを出すため prefix で区別する
+      field_prefix: outdoor_
     - name: scd4x
+      # NOTE: SHT-35 と temp/humi キーが衝突するためリネームする
+      rename:
+          temp: co2_temp
+          humi: co2_humi
     - name: max31856
+      rename:
+          temp: probe_temp
     - name: sht35
     - name: apds9250
     - name: veml7700
+      # NOTE: VEML6075 とデバイスアドレスが同じため、どちらかを別バスに接続する
     - name: veml6075
-      bus: vc
+      i2c_bus: VC
 
 sensing:
     interval_sec: 20
@@ -21,6 +36,10 @@ liveness:
 slack:
     from: sensing
     bot_token: xoxb-XXXXXXXXXXXX-XXXXXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXX
+    # NOTE: info はセンサー復帰通知に使われる (省略可)
+    info:
+        channel:
+            name: "#notify"
     error:
         channel:
             name: "#error"

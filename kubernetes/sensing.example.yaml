@@ -1,0 +1,49 @@
+# sensing-py の Kubernetes デプロイ例。
+# Raspberry Pi ノードで I2C/SPI/UART デバイスへアクセスするため privileged で動かす。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensing
+  labels:
+    app: sensing
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: sensing
+  template:
+    metadata:
+      labels:
+        app: sensing
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: sensing
+          image: sensing-py:latest
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: config
+              mountPath: /opt/sensing_py/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: spool
+              mountPath: /opt/sensing_py/data
+          # NOTE: liveness ファイル (/dev/shm/healthz) の更新が
+          # max(2 × interval_sec, 60 秒) 途絶えたら再起動される
+          livenessProbe:
+            exec:
+              command: ["sensing-healthz"]
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 2
+      volumes:
+        - name: config
+          configMap:
+            name: sensing-config
+        - name: spool
+          emptyDir: {}

@@ -11,7 +11,7 @@ requires-python = ">= 3.11"
 dependencies = [
     "docopt-ng>=0.9.0",
     "fluent-logger>=0.11.1",
-    "my-lib @ git+https://github.com/kimata/my-py-lib@a172af1c93b6d8ba3df733f61934240a28bf43f2",
+    "my-lib @ git+https://github.com/kimata/my-py-lib@e2c01dcf41959a8d3777fa1697515b0945a2d916",
     "pillow>=12.2.0",
     "spidev>=3.6",
 ]
@@ -28,7 +28,7 @@ dev = [
     "pytest-freezegun>=0.4.2",
     "pytest-html>=4.1.1",
     "pytest-mock>=3.14.0",
-    "pytest-playwright>=0.5.1",
+    "pytest-timeout>=2.3.1",
     "pytest-xdist>=3.6.1",
     "pytest>=8.3.2",
 ]
@@ -57,7 +57,7 @@ format = "{base}"
 [tool.pytest.ini_options]
 minversion = "6.0"
 
-addopts = "--verbose --timeout=300 --durations=10 --log-file-level=DEBUG --log-format=\"%(asctime)s %(levelname)s %(message)s\" --log-format=\"%(asctime)s %(levelname)s [%(filename)s:%(lineno)s %(funcName)s] %(message)s\" --capture=sys --html=tests/evidence/index.htm --self-contained-html --cov=src --cov-report=html"
+addopts = "--verbose --timeout=300 --durations=10 --log-file-level=DEBUG --log-format=\"%(asctime)s %(levelname)s [%(filename)s:%(lineno)s %(funcName)s] %(message)s\" --capture=sys --html=tests/evidence/index.htm --self-contained-html --cov=src --cov-report=html"
 
 testpaths = [
     "tests",

@@ -43,6 +43,12 @@ COPY --from=build /opt/sensing_py/.venv /opt/sensing_py/.venv
 
 ENV PATH="/opt/sensing_py/.venv/bin:$PATH"
 
-COPY . .
+# NOTE: config.schema はパッケージ内 (venv) に含まれるため、ソースの COPY は不要。
+# config.yaml は実行時にマウントする。
+COPY config.example.yaml ./
+
+# NOTE: liveness ファイルの更新は sensing 側の設定 (liveness.file.sensing) と一致させる
+HEALTHCHECK --interval=60s --timeout=10s --start-period=120s --retries=2 \
+    CMD ["sensing-healthz"]
 
 CMD ["sensing"]

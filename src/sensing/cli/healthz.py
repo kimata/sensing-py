@@ -3,12 +3,14 @@
 Liveness のチェックを行います
 
 Usage:
-  sensing-healthz [-c CONFIG] [-d]
+  sensing-healthz [-c CONFIG] [-D]
 
 Options:
-  -c CONFIG         : CONFIG を設定ファイルとして読み込んで実行します．[default: config.yaml]
-  -d                : デバッグモードで動作します．
+  -c CONFIG         : CONFIG を設定ファイルとして読み込んで実行します。[default: config.yaml]
+  -D                : デバッグモードで動作します。
 """
+
+from __future__ import annotations
 
 import logging
 import pathlib
@@ -19,17 +21,19 @@ import my_lib.config
 import my_lib.healthz
 import my_lib.logger
 
+import sensing
 
-def main():
+
+def main() -> None:
     args = docopt.docopt(__doc__)
 
     config_file = args["-c"]
-    debug_mode = args["-d"]
+    debug_mode = args["-D"]
 
-    my_lib.logger.init("hems.rasp-aqua", level=logging.DEBUG if debug_mode else logging.INFO)
+    my_lib.logger.init("sensing-healthz", level=logging.DEBUG if debug_mode else logging.INFO)
 
-    logging.info("Using config config: %s", config_file)
-    config = my_lib.config.load(config_file)
+    logging.info("Using config: %s", config_file)
+    config = my_lib.config.load(config_file, sensing.get_schema_path())
 
     target_list = [
         my_lib.healthz.HealthzTarget(
@@ -45,7 +49,7 @@ def main():
         logging.info("OK.")
         sys.exit(0)
     else:
-        sys.exit(-1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
