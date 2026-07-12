@@ -1,0 +1,67 @@
+<svg viewBox="0 0 940 380" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+  <rect width="940" height="380" fill="#ffffff"/>
+  <text x="20" y="28" font-size="13" font-weight="bold" fill="#334155">設定からドライバ生成までの解決フロー (my_lib.sensor.load)</text>
+
+  <!-- config -->
+  <rect x="20" y="55" width="240" height="150" rx="6" fill="#fefce8" stroke="#eab308"/>
+  <text x="140" y="76" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#713f12">config.yaml の sensor 項目</text>
+  <text x="35" y="96" font-size="10" font-family="monospace" fill="#334155">- name: scd4x</text>
+  <text x="35" y="112" font-size="10" font-family="monospace" fill="#334155">  rename: {temp: co2_temp}</text>
+  <text x="35" y="128" font-size="10" font-family="monospace" fill="#334155">- name: veml6075</text>
+  <text x="35" y="144" font-size="10" font-family="monospace" fill="#334155">  i2c_bus: VC</text>
+  <text x="35" y="160" font-size="10" font-family="monospace" fill="#334155">- name: rg_15</text>
+  <text x="35" y="176" font-size="10" font-family="monospace" fill="#334155">  uart_dev: /dev/ttyAMA0</text>
+  <text x="35" y="196" font-size="9.5" fill="#64748b">schema は additionalProperties を拒否</text>
+
+  <!-- resolve -->
+  <rect x="310" y="55" width="290" height="90" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="455" y="76" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1e3a8a">resolve_driver(name)</text>
+  <text x="325" y="96" font-size="10" fill="#334155">DRIVER_NAME_LIST (SensorBase 準拠の 17 種) と照合</text>
+  <text x="325" y="112" font-size="10" fill="#334155">未知の名前 → difflib で近い候補を提示して</text>
+  <text x="325" y="128" font-size="10" fill="#334155">ValueError (bp35a1 等の非センサーも拒否)</text>
+
+  <line x1="260" y1="100" x2="308" y2="100" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- I2C 分岐 -->
+  <rect x="310" y="170" width="290" height="100" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="455" y="191" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1e3a8a">I2C センサー (既定)</text>
+  <text x="325" y="211" font-size="10" fill="#334155">i2c_bus (ARM=0x1 / VC=0x0, 大小文字不問) を解決</text>
+  <text x="325" y="227" font-size="10" fill="#334155">/dev/i2c-&lt;n&gt; が無ければ warning してスキップ</text>
+  <text x="325" y="243" font-size="10" fill="#334155">dev_addr 指定があれば kwargs で渡す</text>
+  <text x="325" y="259" font-size="10" font-family="monospace" fill="#64748b">sensor = クラス(bus_id=..., dev_addr=...)</text>
+
+  <!-- UART 分岐 -->
+  <rect x="630" y="170" width="290" height="100" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="775" y="191" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1e3a8a">UART センサー (uart_dev あり)</text>
+  <text x="645" y="211" font-size="10" fill="#334155">デバイスファイルが無ければ warning してスキップ</text>
+  <text x="645" y="227" font-size="10" fill="#334155">(I2C バス不在時と対称の挙動)</text>
+  <text x="645" y="247" font-size="10" font-family="monospace" fill="#64748b">sensor = クラス(uart_dev,</text>
+  <text x="645" y="262" font-size="10" font-family="monospace" fill="#64748b">                sensor_def.get("param"))</text>
+
+  <line x1="455" y1="145" x2="455" y2="168" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="120" x2="720" y2="168" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- 共通後処理 -->
+  <rect x="310" y="295" width="610" height="60" rx="6" fill="#f0fdf4" stroke="#4ade80"/>
+  <text x="325" y="317" font-size="11" font-weight="bold" fill="#14532d">共通後処理</text>
+  <text x="325" y="336" font-size="10" fill="#334155">sensor.required / sensor.field_prefix / sensor.field_rename を config から設定して sensor_list へ追加</text>
+
+  <line x1="455" y1="270" x2="500" y2="293" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="775" y1="270" x2="730" y2="293" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- エラー例 -->
+  <rect x="630" y="55" width="290" height="90" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="775" y="76" text-anchor="middle" font-size="11" font-weight="bold" fill="#b91c1c">エラー例</text>
+  <text x="645" y="96" font-size="9.5" font-family="monospace" fill="#7f1d1d">未知のセンサー名: 'veml770'。</text>
+  <text x="645" y="111" font-size="9.5" font-family="monospace" fill="#7f1d1d">もしかして: veml7700, veml6075?</text>
+  <text x="645" y="126" font-size="9.5" font-family="monospace" fill="#7f1d1d">指定可能な名前: ads1015, ads1115, ...</text>
+  <line x1="600" y1="85" x2="628" y2="85" stroke="#dc2626" stroke-width="1.3" marker-end="url(#red)"/>
+</svg>

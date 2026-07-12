@@ -1,0 +1,82 @@
+<svg viewBox="0 0 940 520" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+    <marker id="green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/>
+    </marker>
+  </defs>
+  <rect width="940" height="520" fill="#ffffff"/>
+  <text x="20" y="28" font-size="13" font-weight="bold" fill="#334155">計測データの流れ (sense → fluentd / スプール)</text>
+
+  <!-- センサー毎の dict -->
+  <rect x="20" y="50" width="200" height="96" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="120" y="70" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1e3a8a">get_value_map()</text>
+  <text x="120" y="88" text-anchor="middle" font-size="10" font-family="monospace" fill="#334155">{"temp": 25.0,</text>
+  <text x="120" y="103" text-anchor="middle" font-size="10" font-family="monospace" fill="#334155"> "humi": 50.1}</text>
+  <text x="120" y="124" text-anchor="middle" font-size="9.5" fill="#64748b">センサーごとの計測値 dict</text>
+
+  <!-- rename/prefix -->
+  <rect x="255" y="50" width="210" height="96" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="360" y="70" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1e3a8a">_apply_field_naming()</text>
+  <text x="360" y="88" text-anchor="middle" font-size="10" fill="#334155">① rename でキー置換</text>
+  <text x="360" y="103" text-anchor="middle" font-size="10" fill="#334155">② field_prefix を前置</text>
+  <text x="360" y="122" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#64748b">temp → co2_temp など</text>
+  <text x="360" y="137" text-anchor="middle" font-size="9.5" fill="#64748b">(config の sensor 項目で指定)</text>
+
+  <!-- 衝突検出 + merge -->
+  <rect x="500" y="50" width="200" height="96" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="600" y="70" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#1e3a8a">merge + 衝突検出</text>
+  <text x="600" y="88" text-anchor="middle" font-size="10" fill="#334155">キー → センサー名を記録し、</text>
+  <text x="600" y="103" text-anchor="middle" font-size="10" fill="#334155">重複時は「どちらの値で上書き</text>
+  <text x="600" y="118" text-anchor="middle" font-size="10" fill="#334155">されるか」を warning ログ</text>
+
+  <!-- value_map -->
+  <rect x="735" y="50" width="185" height="96" rx="6" fill="#fef9c3" stroke="#eab308"/>
+  <text x="827" y="70" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#713f12">value_map</text>
+  <text x="827" y="88" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#334155">{"co2": 640, "temp": 25.0,</text>
+  <text x="827" y="103" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#334155"> "outdoor_lux": 51200, ...,</text>
+  <text x="827" y="118" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#334155"> "hostname": "rasp-xxx"}</text>
+  <text x="827" y="135" text-anchor="middle" font-size="9" fill="#64748b">hostname は app.py が追加</text>
+
+  <line x1="220" y1="98" x2="253" y2="98" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="465" y1="98" x2="498" y2="98" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="700" y1="98" x2="733" y2="98" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- fluentd send -->
+  <rect x="330" y="200" width="280" height="76" rx="6" fill="#ecfdf5" stroke="#34d399"/>
+  <text x="470" y="222" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#065f46">fluentd_util.send()</text>
+  <text x="470" y="240" text-anchor="middle" font-size="10" fill="#334155">タグ: &lt;fluentd.tag&gt;.&lt;fluentd.data_label&gt;</text>
+  <text x="470" y="255" text-anchor="middle" font-size="10" fill="#334155">既定: sensor.rasp (port 24224)</text>
+  <text x="470" y="270" text-anchor="middle" font-size="9.5" fill="#64748b">forward_packet_error=False (偽陽性防止)</text>
+
+  <line x1="827" y1="146" x2="560" y2="198" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- 成功パス -->
+  <rect x="20" y="320" width="380" height="90" rx="6" fill="#ecfdf5" stroke="#16a34a"/>
+  <text x="35" y="342" font-size="11.5" font-weight="bold" fill="#065f46">送信成功時: spool.replay()</text>
+  <text x="35" y="360" font-size="10" fill="#334155">滞留レコードを先頭から emit_with_time で再送 (元のタイムスタンプ維持)</text>
+  <text x="35" y="376" font-size="10" fill="#334155">1 周期あたり最大 500 件 (REPLAY_LIMIT)。失敗レコードに当たったら中断</text>
+  <text x="35" y="392" font-size="10" fill="#334155">破損した行 (JSON でない等) は warning を出して破棄</text>
+
+  <!-- 失敗パス -->
+  <rect x="440" y="320" width="480" height="90" rx="6" fill="#fff7ed" stroke="#fb923c"/>
+  <text x="455" y="342" font-size="11.5" font-weight="bold" fill="#9a3412">送信失敗時: spool.append()</text>
+  <text x="455" y="360" font-size="10" font-family="monospace" fill="#334155">{"time": 1234567890.1, "label": "rasp", "data": {...}}</text>
+  <text x="455" y="376" font-size="10" fill="#334155">JSON Lines 形式で fluentd.spool_file へ追記 (相対パスは base_dir 基準)</text>
+  <text x="455" y="392" font-size="10" fill="#334155">上限 fluentd.spool_max_mb (既定 10MB)。超過時は破棄して warning</text>
+
+  <line x1="410" y1="276" x2="240" y2="318" stroke="#16a34a" stroke-width="1.5" marker-end="url(#green)"/>
+  <text x="290" y="300" font-size="10" fill="#16a34a">True</text>
+  <line x1="540" y1="276" x2="650" y2="318" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red)"/>
+  <text x="610" y="300" font-size="10" fill="#dc2626">False</text>
+
+  <!-- meta -->
+  <rect x="20" y="440" width="900" height="60" rx="6" fill="#ecfdf5" stroke="#34d399" stroke-dasharray="6 3"/>
+  <text x="35" y="462" font-size="11.5" font-weight="bold" fill="#065f46">メタレコード (毎周期、&lt;tag&gt;.meta へ別送。スプール対象外)</text>
+  <text x="35" y="482" font-size="10" font-family="monospace" fill="#334155">{hostname, elapsed_sec, success, sensor_active, sensor_inactive, sensor_inactive_names, spool_count}</text>
+</svg>

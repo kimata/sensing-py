@@ -1,0 +1,64 @@
+<svg viewBox="0 0 940 320" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect width="940" height="320" fill="#ffffff"/>
+
+  <text x="20" y="28" font-size="13" font-weight="bold" fill="#334155">sensing コマンドの起動フロー (cli/app.py main)</text>
+
+  <rect x="20" y="50" width="150" height="56" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="95" y="73" text-anchor="middle" font-size="11.5" fill="#1e3a8a">docopt で引数解析</text>
+  <text x="95" y="90" text-anchor="middle" font-size="10" fill="#3b82f6">-c / -D / --list /</text>
+  <text x="95" y="102" text-anchor="middle" font-size="10" fill="#3b82f6">--once / --check-config</text>
+
+  <rect x="205" y="50" width="140" height="56" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="275" y="76" text-anchor="middle" font-size="11.5" fill="#1e3a8a">my_lib.logger.init</text>
+  <text x="275" y="93" text-anchor="middle" font-size="10" fill="#3b82f6">("sensing")</text>
+
+  <rect x="380" y="50" width="220" height="56" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="490" y="70" text-anchor="middle" font-size="11.5" fill="#1e3a8a">my_lib.config.load</text>
+  <text x="490" y="86" text-anchor="middle" font-size="10" fill="#3b82f6">config.yaml + パッケージ内 config.schema</text>
+  <text x="490" y="99" text-anchor="middle" font-size="10" fill="#3b82f6">(JSON Schema 検証, additionalProperties 拒否)</text>
+
+  <rect x="635" y="50" width="130" height="56" rx="6" fill="#fef9c3" stroke="#eab308"/>
+  <text x="700" y="76" text-anchor="middle" font-size="11.5" fill="#713f12">動作モード分岐</text>
+
+  <line x1="170" y1="78" x2="203" y2="78" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="345" y1="78" x2="378" y2="78" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="600" y1="78" x2="633" y2="78" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- モード分岐 -->
+  <rect x="20" y="160" width="205" height="64" rx="6" fill="#f0fdf4" stroke="#4ade80"/>
+  <text x="122" y="180" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#14532d">--check-config</text>
+  <text x="122" y="197" text-anchor="middle" font-size="10" fill="#166534">全センサー名を resolve_driver で検証</text>
+  <text x="122" y="212" text-anchor="middle" font-size="10" fill="#166534">exit 0 (OK) / 例外 (NG)</text>
+
+  <rect x="250" y="160" width="205" height="64" rx="6" fill="#f0fdf4" stroke="#4ade80"/>
+  <text x="352" y="180" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#14532d">--list</text>
+  <text x="352" y="197" text-anchor="middle" font-size="10" fill="#166534">load → 全センサー ping → 表形式表示</text>
+  <text x="352" y="212" text-anchor="middle" font-size="10" fill="#166534">exit 0 (全応答) / 1 (無応答あり)</text>
+
+  <rect x="480" y="160" width="205" height="64" rx="6" fill="#f0fdf4" stroke="#4ade80"/>
+  <text x="582" y="180" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#14532d">--once</text>
+  <text x="582" y="197" text-anchor="middle" font-size="10" fill="#166534">execute(once=True): 1 周期だけ計測し表示</text>
+  <text x="582" y="212" text-anchor="middle" font-size="10" fill="#166534">送信・liveness 更新・Slack 通知なし</text>
+
+  <rect x="710" y="160" width="205" height="64" rx="6" fill="#fef9c3" stroke="#eab308"/>
+  <text x="812" y="180" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#713f12">常駐 (既定)</text>
+  <text x="812" y="197" text-anchor="middle" font-size="10" fill="#854d0e">execute(): fluentd/spool/Slack を初期化し</text>
+  <text x="812" y="212" text-anchor="middle" font-size="10" fill="#854d0e">SIGTERM/SIGINT 登録 → メインループへ</text>
+
+  <line x1="680" y1="106" x2="130" y2="158" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="690" y1="106" x2="360" y2="158" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="700" y1="106" x2="590" y2="158" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="720" y1="106" x2="800" y2="158" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <rect x="250" y="252" width="435" height="48" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="467" y="272" text-anchor="middle" font-size="11.5" fill="#1e3a8a">my_lib.sensor.load(config["sensor"]) → my_lib.sensor.ping(sensor_list)</text>
+  <text x="467" y="289" text-anchor="middle" font-size="10" fill="#3b82f6">応答あり → active / 応答なし → inactive (required: true のセンサーが無応答なら起動失敗)</text>
+
+  <line x1="582" y1="224" x2="500" y2="250" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="812" y1="224" x2="600" y2="250" stroke="#475569" stroke-width="1.2" marker-end="url(#arrow)"/>
+</svg>

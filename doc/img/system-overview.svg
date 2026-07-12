@@ -1,0 +1,95 @@
+<svg viewBox="0 0 940 540" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect width="940" height="540" fill="#ffffff"/>
+
+  <!-- センサー群 -->
+  <rect x="15" y="30" width="190" height="420" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="110" y="52" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">センサー群 (Raspberry Pi)</text>
+
+  <rect x="30" y="65" width="160" height="150" rx="5" fill="#ffffff" stroke="#93c5fd"/>
+  <text x="110" y="83" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#334155">I2C (smbus2)</text>
+  <text x="110" y="100" text-anchor="middle" font-size="10" fill="#475569">SHT-35 / SCD4X / APDS9250</text>
+  <text x="110" y="115" text-anchor="middle" font-size="10" fill="#475569">VEML7700 / VEML6075</text>
+  <text x="110" y="130" text-anchor="middle" font-size="10" fill="#475569">EZO-pH / EZO-RTD / EZO-DO</text>
+  <text x="110" y="145" text-anchor="middle" font-size="10" fill="#475569">ADS1015 / ADS1115</text>
+  <text x="110" y="160" text-anchor="middle" font-size="10" fill="#475569">GROVE-TDS / LP_PYRA03</text>
+  <text x="110" y="175" text-anchor="middle" font-size="10" fill="#475569">SM9561 (I2C-RS485 変換)</text>
+  <text x="110" y="196" text-anchor="middle" font-size="9.5" fill="#64748b">バスは ARM (/dev/i2c-1) と</text>
+  <text x="110" y="209" text-anchor="middle" font-size="9.5" fill="#64748b">VC (/dev/i2c-0) の 2 系統</text>
+
+  <rect x="30" y="228" width="160" height="62" rx="5" fill="#ffffff" stroke="#93c5fd"/>
+  <text x="110" y="246" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#334155">UART (pyserial)</text>
+  <text x="110" y="262" text-anchor="middle" font-size="10" fill="#475569">RG_15 (雨量計)</text>
+  <text x="110" y="277" text-anchor="middle" font-size="10" fill="#475569">EchonetEnergy (BP35A1)</text>
+
+  <rect x="30" y="303" width="160" height="48" rx="5" fill="#ffffff" stroke="#93c5fd"/>
+  <text x="110" y="321" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#334155">SPI (spidev)</text>
+  <text x="110" y="337" text-anchor="middle" font-size="10" fill="#475569">MAX31856 (熱電対)</text>
+
+  <rect x="30" y="364" width="160" height="48" rx="5" fill="#ffffff" stroke="#93c5fd"/>
+  <text x="110" y="382" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#334155">IO-Link (LTC2874)</text>
+  <text x="110" y="398" text-anchor="middle" font-size="10" fill="#475569">FD_Q10C (流量計)</text>
+
+  <!-- sensing-py -->
+  <rect x="265" y="30" width="330" height="330" rx="8" fill="#fefce8" stroke="#eab308"/>
+  <text x="430" y="52" text-anchor="middle" font-size="14" font-weight="bold" fill="#713f12">sensing-py (src/sensing/)</text>
+  <rect x="282" y="65" width="296" height="52" rx="5" fill="#ffffff" stroke="#d4d4d8"/>
+  <text x="430" y="83" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#334155">cli/app.py — メインループ</text>
+  <text x="430" y="99" text-anchor="middle" font-size="10" fill="#475569">retry_inactive → sense → 通知 → 送信/退避</text>
+  <text x="430" y="112" text-anchor="middle" font-size="10" fill="#475569">→ meta 送信 → liveness 更新 → wait</text>
+
+  <rect x="282" y="127" width="143" height="46" rx="5" fill="#ffffff" stroke="#d4d4d8"/>
+  <text x="353" y="145" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">cli/healthz.py</text>
+  <text x="353" y="161" text-anchor="middle" font-size="9.5" fill="#475569">liveness 判定 CLI</text>
+
+  <rect x="435" y="127" width="143" height="46" rx="5" fill="#ffffff" stroke="#d4d4d8"/>
+  <text x="506" y="145" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">spool.py</text>
+  <text x="506" y="161" text-anchor="middle" font-size="9.5" fill="#475569">送信失敗の退避・再送</text>
+
+  <rect x="282" y="183" width="296" height="42" rx="5" fill="#ffffff" stroke="#d4d4d8"/>
+  <text x="430" y="200" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">config.schema (パッケージ内)</text>
+  <text x="430" y="215" text-anchor="middle" font-size="9.5" fill="#475569">importlib.resources で解決 (CWD 非依存)</text>
+
+  <rect x="282" y="238" width="296" height="108" rx="5" fill="#f5f3ff" stroke="#a78bfa"/>
+  <text x="430" y="257" text-anchor="middle" font-size="12" font-weight="bold" fill="#5b21b6">my-py-lib (git pin で依存)</text>
+  <text x="430" y="276" text-anchor="middle" font-size="10" fill="#6d28d9">my_lib.sensor — ドライバ 17 種 + load/ping/sense</text>
+  <text x="430" y="292" text-anchor="middle" font-size="10" fill="#6d28d9">my_lib.config — YAML + JSON Schema 検証</text>
+  <text x="430" y="308" text-anchor="middle" font-size="10" fill="#6d28d9">my_lib.fluentd_util / footprint / healthz</text>
+  <text x="430" y="324" text-anchor="middle" font-size="10" fill="#6d28d9">my_lib.notify.slack / my_lib.logger</text>
+
+  <!-- 右側: 出力先 -->
+  <rect x="660" y="30" width="265" height="72" rx="8" fill="#ecfdf5" stroke="#34d399"/>
+  <text x="792" y="52" text-anchor="middle" font-size="13" font-weight="bold" fill="#065f46">Fluentd</text>
+  <text x="792" y="70" text-anchor="middle" font-size="10.5" fill="#047857">計測値: &lt;tag&gt;.&lt;data_label&gt; (既定 sensor.rasp)</text>
+  <text x="792" y="86" text-anchor="middle" font-size="10.5" fill="#047857">メタ情報: &lt;tag&gt;.meta (成否・所要時間など)</text>
+
+  <rect x="660" y="122" width="265" height="72" rx="8" fill="#fdf2f8" stroke="#f472b6"/>
+  <text x="792" y="144" text-anchor="middle" font-size="13" font-weight="bold" fill="#9d174d">Slack</text>
+  <text x="792" y="162" text-anchor="middle" font-size="10.5" fill="#be185d">error ch: 連続 2 回失敗したセンサーの通知</text>
+  <text x="792" y="178" text-anchor="middle" font-size="10.5" fill="#be185d">info ch (任意): 復帰通知</text>
+
+  <rect x="660" y="214" width="265" height="120" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="792" y="236" text-anchor="middle" font-size="13" font-weight="bold" fill="#334155">Liveness</text>
+  <text x="792" y="254" text-anchor="middle" font-size="10.5" fill="#475569">/dev/shm/healthz (footprint)</text>
+  <text x="792" y="272" text-anchor="middle" font-size="10.5" fill="#475569">↓ sensing-healthz が mtime を判定</text>
+  <text x="792" y="290" text-anchor="middle" font-size="10.5" fill="#475569">経過 &gt; max(2×interval_sec, 60s) で NG</text>
+  <text x="792" y="312" text-anchor="middle" font-size="10.5" fill="#475569">Docker HEALTHCHECK / K8s livenessProbe</text>
+
+  <rect x="660" y="354" width="265" height="66" rx="8" fill="#fff7ed" stroke="#fb923c"/>
+  <text x="792" y="376" text-anchor="middle" font-size="13" font-weight="bold" fill="#9a3412">スプール (ローカルディスク)</text>
+  <text x="792" y="394" text-anchor="middle" font-size="10.5" fill="#c2410c">fluentd.spool_file (JSON Lines)</text>
+  <text x="792" y="410" text-anchor="middle" font-size="10.5" fill="#c2410c">送信失敗時に退避 → 復旧時に再送</text>
+
+  <!-- arrows -->
+  <line x1="205" y1="220" x2="263" y2="195" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="212" y="200" font-size="10" fill="#475569">計測</text>
+  <line x1="595" y1="75" x2="658" y2="66" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="595" y1="120" x2="658" y2="155" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="595" y1="240" x2="658" y2="265" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="578" y1="160" x2="658" y2="380" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+  <text x="620" y="300" font-size="10" fill="#c2410c" transform="rotate(64 620 300)">送信失敗時</text>
+</svg>

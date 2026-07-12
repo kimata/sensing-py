@@ -1,0 +1,92 @@
+<svg viewBox="0 0 940 660" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+  <rect width="940" height="660" fill="#ffffff"/>
+  <text x="20" y="28" font-size="13" font-weight="bold" fill="#334155">メインループ 1 周期 (cli/app.py execute)</text>
+
+  <!-- ① retry_inactive -->
+  <rect x="20" y="50" width="420" height="66" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="35" y="70" font-size="11.5" font-weight="bold" fill="#1e3a8a">① my_lib.sensor.retry_inactive()</text>
+  <text x="35" y="87" font-size="10.5" fill="#334155">inactive のセンサーをラウンドロビンで 1 台だけ ping</text>
+  <text x="35" y="103" font-size="10.5" fill="#334155">応答があれば active へ復帰 (consecutive_fails = 0)</text>
+
+  <rect x="490" y="50" width="430" height="66" rx="6" fill="#fdf2f8" stroke="#f472b6"/>
+  <text x="505" y="70" font-size="11.5" font-weight="bold" fill="#9d174d">復帰通知 (notify_recovered)</text>
+  <text x="505" y="87" font-size="10.5" fill="#334155">ログ出力 + slack.info (info チャンネル設定時のみ)</text>
+  <text x="505" y="103" font-size="10.5" fill="#334155">「&lt;センサー情報&gt; on &lt;hostname&gt; が復帰しました」</text>
+  <line x1="440" y1="83" x2="488" y2="83" stroke="#475569" stroke-width="1.3" marker-end="url(#arrow)"/>
+  <text x="447" y="76" font-size="9.5" fill="#475569">復帰時</text>
+
+  <!-- ② sense -->
+  <rect x="20" y="140" width="420" height="98" rx="6" fill="#eff6ff" stroke="#60a5fa"/>
+  <text x="35" y="160" font-size="11.5" font-weight="bold" fill="#1e3a8a">② my_lib.sensor.sense(active, FAIL_THRESHOLD=2)</text>
+  <text x="35" y="177" font-size="10.5" fill="#334155">各センサーで get_value_map() → rename / field_prefix 適用</text>
+  <text x="35" y="193" font-size="10.5" fill="#334155">→ キー重複を warning → value_map に merge</text>
+  <text x="35" y="209" font-size="10.5" fill="#334155">失敗したセンサーは consecutive_fails++ (is_success = False)</text>
+  <text x="35" y="225" font-size="10.5" fill="#334155">戻り値: (value_map, is_success, newly_failed, newly_recovered)</text>
+
+  <!-- ③ 降格・通知 -->
+  <rect x="490" y="140" width="430" height="98" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="505" y="160" font-size="11.5" font-weight="bold" fill="#b91c1c">③ 連続 2 回失敗 (newly_failed) の処理</text>
+  <text x="505" y="177" font-size="10.5" fill="#334155">・slack.error でトレースバック付き通知</text>
+  <text x="505" y="193" font-size="10.5" fill="#334155">  (レート制限: アプリ + タイトル別に interval_min)</text>
+  <text x="505" y="209" font-size="10.5" fill="#334155">・active から inactive へ降格</text>
+  <text x="505" y="225" font-size="10.5" fill="#334155">  → 以降は ① のラウンドロビンで復帰を試みる</text>
+  <line x1="440" y1="189" x2="488" y2="189" stroke="#dc2626" stroke-width="1.3" marker-end="url(#red)"/>
+
+  <!-- ④ 送信 -->
+  <rect x="20" y="262" width="420" height="82" rx="6" fill="#ecfdf5" stroke="#34d399"/>
+  <text x="35" y="282" font-size="11.5" font-weight="bold" fill="#065f46">④ fluentd 送信 (value_map + hostname)</text>
+  <text x="35" y="299" font-size="10.5" fill="#334155">my_lib.fluentd_util.send(sender, data_label, value_map)</text>
+  <text x="35" y="315" font-size="10.5" fill="#334155">成功 → spool.replay() で滞留分を再送 (最大 500 件/周期)</text>
+  <text x="35" y="331" font-size="10.5" fill="#334155">失敗 → spool.append() でディスクへ退避</text>
+
+  <!-- ⑤ meta -->
+  <rect x="490" y="262" width="430" height="82" rx="6" fill="#ecfdf5" stroke="#34d399"/>
+  <text x="505" y="282" font-size="11.5" font-weight="bold" fill="#065f46">⑤ メタレコード送信 (&lt;tag&gt;.meta)</text>
+  <text x="505" y="299" font-size="10.5" fill="#334155">hostname / elapsed_sec / success /</text>
+  <text x="505" y="315" font-size="10.5" fill="#334155">sensor_active / sensor_inactive / sensor_inactive_names /</text>
+  <text x="505" y="331" font-size="10.5" fill="#334155">spool_count — 欠測と 0 値を下流で区別するため</text>
+  <line x1="440" y1="303" x2="488" y2="303" stroke="#475569" stroke-width="1.3" marker-end="url(#arrow)"/>
+
+  <!-- ⑥ liveness -->
+  <rect x="20" y="368" width="420" height="82" rx="6" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="35" y="388" font-size="11.5" font-weight="bold" fill="#334155">⑥ Liveness 更新 (footprint.update)</text>
+  <text x="35" y="405" font-size="10.5" fill="#334155">条件: is_success (全 active センサー計測成功)</text>
+  <text x="35" y="421" font-size="10.5" fill="#334155">かつ データ保全 (送信成功 または スプール退避成功)</text>
+  <text x="35" y="437" font-size="10.5" fill="#334155">→ liveness.file.sensing (例: /dev/shm/healthz) の mtime 更新</text>
+
+  <!-- ⑦ wait -->
+  <rect x="490" y="368" width="430" height="82" rx="6" fill="#fef9c3" stroke="#eab308"/>
+  <text x="505" y="388" font-size="11.5" font-weight="bold" fill="#713f12">⑦ 待機と終了判定</text>
+  <text x="505" y="405" font-size="10.5" fill="#334155">sleep_time = max(interval_sec − 経過時間, 1)</text>
+  <text x="505" y="421" font-size="10.5" fill="#334155">should_terminate.wait(sleep_time) — threading.Event なので</text>
+  <text x="505" y="437" font-size="10.5" fill="#334155">SIGTERM / SIGINT 受信で即座に解除されループを抜ける</text>
+
+  <!-- 終了処理 -->
+  <rect x="20" y="486" width="900" height="60" rx="6" fill="#fff7ed" stroke="#fb923c"/>
+  <text x="35" y="506" font-size="11.5" font-weight="bold" fill="#9a3412">終了処理 (finally)</text>
+  <text x="35" y="523" font-size="10.5" fill="#334155">my_lib.sensor.close(sensor_list) — 全センサーの I2C / SPI / serial ハンドルを解放</text>
+  <text x="35" y="539" font-size="10.5" fill="#334155">my_lib.fluentd_util.close(sender) — fluent-logger 内部バッファ (最大 1MB) の未送信データを flush してから終了</text>
+
+  <!-- フロー矢印 -->
+  <line x1="230" y1="116" x2="230" y2="138" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="230" y1="238" x2="230" y2="260" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="230" y1="344" x2="230" y2="366" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="705" y1="344" x2="705" y2="366" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="470" y1="450" x2="470" y2="484" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="480" y="472" font-size="10" fill="#475569">終了シグナル受信時</text>
+
+  <!-- ループバック -->
+  <path d="M 920 409 C 936 409 936 30 460 30 C 240 30 230 36 230 48" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow)"/>
+  <text x="560" y="24" font-size="10" fill="#64748b">interval_sec ごとに繰り返し (config: sensing.interval_sec)</text>
+
+  <text x="20" y="580" font-size="10.5" fill="#64748b">※ --once 指定時は ③ の後にループを抜け、④〜⑥ (送信・liveness 更新) は行わない。</text>
+  <text x="20" y="598" font-size="10.5" fill="#64748b">※ Slack 未設定 (config に slack セクションなし) の場合、通知は SlackEmptyConfig により no-op になる。</text>
+</svg>

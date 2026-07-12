@@ -18,6 +18,7 @@
 - [☸️ Kubernetes デプロイ](#️-kubernetes-デプロイ)
 - [🧪 テスト](#-テスト)
 - [📊 CI/CD](#-cicd)
+- [📚 ドキュメント](#-ドキュメント)
 - [📝 ライセンス](#-ライセンス)
 
 ## 📋 概要
@@ -209,6 +210,11 @@ uv run pytest tests/unit
 
 GitHub Actions ([.github/workflows/test.yaml](.github/workflows/test.yaml)) で push ごとに
 ユニットテストと `--check-config` による設定検証を実行します。
+
+## 📚 ドキュメント
+
+- [アーキテクチャ解説](doc/architecture.md) — 全体構成・メインループ・センサー抽象化・
+  状態遷移・スプール・Liveness の仕組みを図解付きで説明しています。
 
 ## 📝 ライセンス
 
