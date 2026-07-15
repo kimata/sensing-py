@@ -44,8 +44,12 @@ COPY --from=build /opt/sensing_py/.venv /opt/sensing_py/.venv
 ENV PATH="/opt/sensing_py/.venv/bin:$PATH"
 
 # NOTE: config.schema はパッケージ内 (venv) に含まれるため、ソースの COPY は不要。
-# config.yaml は実行時にマウントする。
 COPY config.example.yaml ./
+
+# NOTE: 各ノード用 config (sense-weather.yaml 等) をイメージに焼き込む。
+# CI の build 工程で sense-config リポジトリを clone してビルドコンテキストへ mv 済み
+# (.gitlab-ci.yml 参照)。DaemonSet は `sensing -c sense-<node>.yaml` で参照する。
+COPY sense-*.yaml ./
 
 # NOTE: liveness ファイルの更新は sensing 側の設定 (liveness.file.sensing) と一致させる
 HEALTHCHECK --interval=60s --timeout=10s --start-period=120s --retries=2 \
