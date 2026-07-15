@@ -1,49 +1,94 @@
 # sensing-py の Kubernetes デプロイ例。
 # Raspberry Pi ノードで I2C/SPI/UART デバイスへアクセスするため privileged で動かす。
+#
+# センサー種別ごとに 1 ノードへ配置する DaemonSet として運用している。
+# node-role.kubernetes.io/sensor=<role> ラベルの付いたノードにのみスケジュールされる。
+#
+# NOTE: 各ノード用の設定ファイル (sense-<role>.yaml) は、CI の build 工程で
+#       sense-config リポジトリを clone してビルドコンテキストへ配置し、
+#       イメージ内 /opt/sensing_py/ へ焼き込む (.gitlab-ci.yml / Dockerfile 参照)。
+#       `sensing -c sense-<role>.yaml` でそれを参照する。
+#       イメージに焼き込まず実行時に差し込みたい場合は、末尾の ConfigMap 方式を使う。
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
-  name: sensing
+  name: sensor-weather
+  namespace: sensor
   labels:
-    app: sensing
+    app: sensor-weather
 spec:
-  replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
-      app: sensing
+      app: sensor-weather
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   template:
     metadata:
       labels:
-        app: sensing
+        app: sensor-weather
     spec:
-      nodeSelector:
-        kubernetes.io/arch: arm64
+      # sensor ロールのうち weather ノードにのみ配置する
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/sensor
+                    operator: In
+                    values:
+                      - weather
       containers:
-        - name: sensing
-          image: sensing-py:latest
+        - name: sensor-weather
+          image: gitlab.green-rabbit.net:5050/kimata/sensing-py:latest
+          imagePullPolicy: Always
+          # config はイメージに焼き込み済み (上の NOTE 参照)
+          command: ["sensing", "-c", "sense-weather.yaml"]
           securityContext:
             privileged: true
-          volumeMounts:
-            - name: config
-              mountPath: /opt/sensing_py/config.yaml
-              subPath: config.yaml
-              readOnly: true
-            - name: spool
-              mountPath: /opt/sensing_py/data
+          env:
+            - name: NODE_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           # NOTE: liveness ファイル (/dev/shm/healthz) の更新が
-          # max(2 × interval_sec, 60 秒) 途絶えたら再起動される
+          #       max(2 × interval_sec, 60 秒) 途絶えたら再起動される
           livenessProbe:
             exec:
-              command: ["sensing-healthz"]
+              command: ["sensing-healthz", "-c", "sense-weather.yaml"]
             initialDelaySeconds: 120
-            periodSeconds: 60
-            timeoutSeconds: 10
-            failureThreshold: 2
+            periodSeconds: 120
+            timeoutSeconds: 30
+            failureThreshold: 3
+          volumeMounts:
+            # I2C/SPI/UART デバイスへのアクセスに必要
+            - name: dev
+              mountPath: /dev
+      dnsPolicy: Default
+      imagePullSecrets:
+        - name: gitlab-regcred
       volumes:
-        - name: config
-          configMap:
-            name: sensing-config
-        - name: spool
-          emptyDir: {}
+        - name: dev
+          hostPath:
+            path: /dev
+---
+# 【代替】config をイメージに焼き込まず実行時にマウントする場合の手順。
+#
+# 1. sense-config の設定ファイルから ConfigMap を作成する:
+#      kubectl -n sensor create configmap sensing-config \
+#        --from-file=sense-weather.yaml
+#
+# 2. 上の DaemonSet に以下を追記する:
+#      spec.template.spec.volumes:
+#        - name: config
+#          configMap:
+#            name: sensing-config
+#      spec.template.spec.containers[].volumeMounts:
+#        - name: config
+#          mountPath: /opt/sensing_py/sense-weather.yaml
+#          subPath: sense-weather.yaml
+#          readOnly: true
+#
+#    この場合、Dockerfile 側の `COPY sense-*.yaml ./` は不要になる。
